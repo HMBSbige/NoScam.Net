@@ -1,7 +1,9 @@
 ﻿using JiebaNet.Segmenter;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NoScam.Net
 {
@@ -12,21 +14,14 @@ namespace NoScam.Net
 			return new Corpus(text);
 		}
 
-		private readonly Dictionary<string, int> Words = new Dictionary<string, int>();
+		private readonly ConcurrentDictionary<string, int> _words = new ConcurrentDictionary<string, int>();
 
 		public Corpus(string value)
 		{
-			foreach (var word in ParseTextToWords(value))
+			Parallel.ForEach(ParseTextToWords(value), word =>
 			{
-				if (Words.ContainsKey(word))
-				{
-					++Words[word];
-				}
-				else
-				{
-					Words.Add(word, 1);
-				}
-			}
+				_words.AddOrUpdate(word, 1, (s, i) => ++i);
+			});
 		}
 
 		public Corpus()
@@ -34,11 +29,11 @@ namespace NoScam.Net
 
 		}
 
-		public int Count => Words.Count;
+		public int Count => _words.Count;
 
 		public bool Contains(string word)
 		{
-			return Words.ContainsKey(word);
+			return _words.ContainsKey(word);
 		}
 
 		private static IEnumerable<string> ParseTextToWords(string text)
@@ -53,50 +48,43 @@ namespace NoScam.Net
 
 		public void Add(Corpus corpus)
 		{
-			foreach (var pair in corpus.Words)
+			Parallel.ForEach(corpus._words, pair =>
 			{
 				var word = pair.Key;
 				var count = pair.Value;
-				if (Words.ContainsKey(word))
-				{
-					++Words[word];
-				}
-				else
-				{
-					Words.Add(word, count);
-				}
-			}
+				_words.AddOrUpdate(word, count, (s, i) => ++i);
+			});
 		}
 
 		public bool Contains(Corpus corpus)
 		{
 			var result = true;
-			foreach (var word in corpus.Words)
+			Parallel.ForEach(corpus._words, word =>
 			{
-				result &= Words.ContainsKey(word.Key);
-			}
+				result &= _words.ContainsKey(word.Key);
+			});
 			return result;
 		}
 
 		public int CountOccurencesOf(string word)
 		{
-			return Words.ContainsKey(word) ? Words[word] : 0;
+			return _words.TryGetValue(word, out var rValue) ? rValue : 0;
 		}
 
 		public int CountAllOccurences()
 		{
-			return Words.Sum(x => x.Value);
+			return _words.Sum(x => x.Value);
 		}
 
 		public void ForEveryOccurenceOfEachWord(Action<string> action)
 		{
-			foreach (var word in Words)
+			Parallel.ForEach(_words, word =>
 			{
-				foreach (var unused in Enumerable.Range(0, word.Value))
+				Parallel.ForEach(Enumerable.Range(0, word.Value), unused =>
 				{
 					action(word.Key);
-				}
-			}
+				});
+			});
 		}
 	}
 }

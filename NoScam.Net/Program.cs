@@ -1,5 +1,7 @@
-﻿using JiebaNet.Segmenter;
-using System;
+﻿using System;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace NoScam.Net
 {
@@ -7,12 +9,35 @@ namespace NoScam.Net
 	{
 		private static void Main(string[] args)
 		{
-			var segmenter = new JiebaSegmenter();
-			//var segments = segmenter.Cut("万一有突发情况");
-			var segments = segmenter.Cut("实习狗好累");
-			//var segments = segmenter.Cut("一款你习惯了就放不下手的手机");
-			Console.WriteLine($@"{string.Join("/", segments)}");
-			Console.ReadLine();
+			var spamPath = @"D:\Cloud\Git\NoScam.Net\NoScam.Net\Resources\spam.txt";
+			var hamPath = @"D:\Cloud\Git\NoScam.Net\NoScam.Net\Resources\ham.txt";
+			var utf8 = new UTF8Encoding(false);
+
+			var filter = new SpamDetector();
+			filter.Train(spamPath, hamPath);
+
+			var spams = File.ReadAllLines(spamPath, utf8);
+			var r = 0d;
+			//Parallel.ForEach(spams, spam =>
+			//{
+			//	if (filter.IsSpam(Corpus.OfText(spam)))
+			//	{
+			//		++r;
+			//	}
+			//});
+			Parallel.For(40001, 80000, i =>
+			{
+				if (filter.IsSpam(Corpus.OfText(spams[i])))
+				{
+					++r;
+				}
+			});
+			Console.WriteLine($@"{r / spams.Length * 100}%");
+			while (true)
+			{
+				var s = Console.ReadLine();
+				Console.WriteLine(filter.IsSpam(new Corpus(s)));
+			}
 		}
 	}
 }
