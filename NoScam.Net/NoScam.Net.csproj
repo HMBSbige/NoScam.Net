@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\nBayes\nBayes.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Resources\char_state_tab.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
