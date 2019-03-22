@@ -1,4 +1,4 @@
-FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
+﻿FROM microsoft/dotnet:2.2-aspnetcore-runtime AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
@@ -6,6 +6,8 @@ EXPOSE 443
 FROM microsoft/dotnet:2.2-sdk AS build
 WORKDIR /src
 COPY ["WebApi/WebApi.csproj", "WebApi/"]
+COPY ["NoScam.Net/NoScam.Net.csproj", "NoScam.Net/"]
+COPY ["nBayes/nBayes.csproj", "nBayes/"]
 RUN dotnet restore "WebApi/WebApi.csproj"
 COPY . .
 WORKDIR "/src/WebApi"

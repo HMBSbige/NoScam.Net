@@ -1,7 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 
 namespace UnitTest
 {
