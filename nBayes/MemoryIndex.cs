@@ -3,39 +3,29 @@
 namespace nBayes
 {
 	internal class MemoryIndex : Index
-    {
-        internal IndexTable<string, int> table = new IndexTable<string, int>();
+	{
+		internal IndexTable<string, int> Table = new IndexTable<string, int>();
 
-        public MemoryIndex()
-        {
-        }
+		public override int EntryCount => Table.Values.Sum();
 
-        public override int EntryCount
-        {
-            get
-            {
-                return table.Values.Sum();
-            }
-        }
+		public override void Add(Entry document)
+		{
+			foreach (var token in document)
+			{
+				if (Table.ContainsKey(token))
+				{
+					++Table[token];
+				}
+				else
+				{
+					Table.Add(token, 1);
+				}
+			}
+		}
 
-        public override void Add(Entry document)
-        {
-            foreach (string token in document)
-            {
-                if (table.ContainsKey(token))
-                {
-                    table[token]++;
-                }
-                else
-                {
-                    table.Add(token, 1);
-                }
-            }
-        }
-
-        public override int GetTokenCount(string token)
-        {
-            return this.table.ContainsKey(token) ? this.table[token] : 0;
-        }
-    }
+		public override int GetTokenCount(string token)
+		{
+			return Table.TryGetValue(token, out var res) ? res : 0;
+		}
+	}
 }

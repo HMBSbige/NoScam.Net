@@ -8,6 +8,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="Resources\char_state_tab.json" />
+    <Content Remove="Resources\pos_prob_emit.json" />
+    <Content Remove="Resources\pos_prob_start.json" />
+    <Content Remove="Resources\pos_prob_trans.json" />
+    <Content Remove="Resources\prob_emit.json" />
+    <Content Remove="Resources\prob_trans.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Resources\char_state_tab.json" />
+    <None Include="Resources\pos_prob_emit.json" />
+    <None Include="Resources\pos_prob_start.json" />
+    <None Include="Resources\pos_prob_trans.json" />
+    <None Include="Resources\prob_emit.json" />
+    <None Include="Resources\prob_trans.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.0.2105168" />

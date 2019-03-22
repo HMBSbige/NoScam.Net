@@ -1,18 +1,16 @@
-﻿namespace nBayes
+﻿using System.Diagnostics;
+
+namespace nBayes
 {
 	public class Analyzer
 	{
-		public Analyzer()
-		{
-		}
-
 		protected const float Tolerance = .05f;
 
 		public static CategorizationResult Categorize(Entry item, Index first, Index second)
 		{
 			var prediction = GetPrediction(item, first, second);
 
-			//Debug.WriteLine(prediction);
+			Debug.WriteLine(prediction);
 
 			if (prediction <= .5f - Tolerance)
 			{
@@ -41,7 +39,7 @@
 				var probability = CalcProbability(firstCount, first.EntryCount, secondCount, second.EntryCount);
 				LogProbability(probability, ref I, ref invI);
 
-				//Debug.WriteLine($@"{token}: [{probability}] ({firstCount}-{_first.EntryCount}), ({secondCount}-{_second.EntryCount})");
+				Debug.WriteLine($@"{token}: [{probability}] ({firstCount}-{first.EntryCount}), ({secondCount}-{second.EntryCount})");
 			}
 
 			return I / (I + invI);

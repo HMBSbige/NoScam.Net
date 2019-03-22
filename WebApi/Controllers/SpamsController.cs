@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using NoScam.Net;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
 {
@@ -20,9 +15,9 @@ namespace WebApi.Controllers
 
 		// POST api/values
 		[HttpPost]
-		public ActionResult<bool> Post([FromBody] string text)
+		public ActionResult<int> Post([FromBody] string text)
 		{
-			return Program.filter.IsSpam(Corpus.OfText(text));
+			return (int)Program.filter.IsSpam(text);
 		}
 
 		// PUT api/values/5

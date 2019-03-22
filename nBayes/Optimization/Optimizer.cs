@@ -14,55 +14,49 @@ namespace nBayes.Optimization
 	{
 		private List<Option> options = new List<Option>();
 		private Random random = new Random();
-		
+
 		public void Add(Option value)
 		{
 			options.Add(value);
 		}
-		
-		public IEnumerable<Option> Options
-		{
-			get { return options; }
-		}
-		
+
+		public IEnumerable<Option> Options => options;
+
 		public float ExplorationThreshold = 0.2f;
-		
+
 		public Task<Option> Choose()
 		{
 			return Task.Factory.StartNew(() =>
 			{
 				var explore = (float)random.NextDouble();
-				
-				bool useTheBestOption = explore > ExplorationThreshold;
-				
+
+				var useTheBestOption = explore > ExplorationThreshold;
+
 				Option optionToUse;
-				
+
 				if (useTheBestOption)
 				{
-					optionToUse = options
-						.OrderByDescending(o => o.Value)
-							.Take(1)
-							.Single();
+					optionToUse = options.OrderByDescending(o => o.Value).Take(1).Single();
 				}
 				else
 				{
 					// we should experiment
-					int randomIndex = (int)(random.NextDouble() * (double)options.Count);
+					var randomIndex = (int)(random.NextDouble() * options.Count);
 					optionToUse = options[randomIndex];
 				}
-				
+
 				optionToUse.IncrementAttempt();
-				
+
 				return optionToUse;
 			});
 		}
-		
-		public override string ToString ()
+
+		public override string ToString()
 		{
-			StringBuilder sb = new StringBuilder();
-			foreach(var option in options.OrderByDescending(o => o.Value))
+			var sb = new StringBuilder();
+			foreach (var option in options.OrderByDescending(o => o.Value))
 			{
-				sb.Append("\t");
+				sb.Append('\t');
 				sb.AppendLine(option.ToString());
 			}
 			return sb.ToString();

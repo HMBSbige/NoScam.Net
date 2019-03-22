@@ -1,52 +1,29 @@
-﻿using System;
+﻿using nBayes;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace NoScam.Net
 {
 	public class SpamDetector
 	{
-		private readonly Corpus _spamCorpus = new Corpus();
-		private readonly Corpus _hamCorpus = new Corpus();
-		private readonly Corpus _completeCorpus = new Corpus();
+		private readonly Index _spam = Index.CreateMemoryIndex();
+		private readonly Index _ham = Index.CreateMemoryIndex();
 
-		public bool IsSpam(Corpus corpus)
+		public CategorizationResult IsSpam(string str)
 		{
-			var countAllOccurences = (double)_completeCorpus.CountAllOccurences();
-			var beliefInCorpusBeingSpam = _spamCorpus.CountAllOccurences() / countAllOccurences;
-
-			corpus.ForEveryOccurenceOfEachWord(word =>
-			{
-				var occurencesOfWord = _spamCorpus.CountOccurencesOf(word);
-				if (occurencesOfWord == 0)
-				{
-					beliefInCorpusBeingSpam = beliefInCorpusBeingSpam * .4;
-				}
-				else
-				{
-					var beliefInWordOccuringAtAll = _completeCorpus.CountOccurencesOf(word) / countAllOccurences;
-					var beliefInEvidenceAndSpam = _spamCorpus.CountOccurencesOf(word) / countAllOccurences;
-
-					beliefInCorpusBeingSpam = beliefInCorpusBeingSpam * beliefInEvidenceAndSpam / beliefInWordOccuringAtAll;
-				}
-			});
-
-			Debug.WriteLine($@"Belief: {beliefInCorpusBeingSpam}");
-			return beliefInCorpusBeingSpam > .16;
+			return Analyzer.Categorize(Entry.FromString(str), _spam, _ham);
 		}
 
-		public void SpamFound(Corpus corpus)
+		public void SpamFound(string str)
 		{
-			_spamCorpus.Add(corpus);
-			_completeCorpus.Add(corpus);
+			_spam.Add(Entry.FromString(str));
 		}
 
-		public void HamFound(Corpus corpus)
+		public void HamFound(string str)
 		{
-			_hamCorpus.Add(corpus);
-			_completeCorpus.Add(corpus);
+			_ham.Add(Entry.FromString(str));
 		}
 
 		public void Train(string spamPath, string hamPath)
@@ -62,31 +39,23 @@ namespace NoScam.Net
 			var stopwatch = new Stopwatch();
 			stopwatch.Start();
 
-
-			//Parallel.For(0, 40000, i =>
-			//{
-			//	SpamFound(Corpus.OfText(spams[i]));
-			//});
-			Parallel.ForEach(spams, spamText =>
+			foreach (var s in spams)
 			{
-				SpamFound(Corpus.OfText(spamText));
-			});
-			Parallel.For(0, 4000, i =>
-			{
-				HamFound(Corpus.OfText(hams[i]));
-			});
+				_spam.Add(Entry.FromString(s));
+			}
 
-			//Parallel.ForEach(hams, hamText =>
-			//{
-			//	HamFound(Corpus.OfText(hamText));
-			//});
+			foreach (var s in hams)
+			{
+				_ham.Add(Entry.FromString(s));
+			}
+
 
 			stopwatch.Stop();
 			Console.WriteLine($@"耗时：{stopwatch.Elapsed}");
 
 			Console.WriteLine($@"训练完成");
-			Console.WriteLine($@"垃圾短信：{40000}条，非垃圾短信：{4000}条");
-			Console.WriteLine($@"垃圾词:{_spamCorpus.Count}，非垃圾词：{_hamCorpus.Count}");
+			Console.WriteLine($@"垃圾短信：{spams.Length}条，非垃圾短信：{hams.Length}条");
+			Console.WriteLine($@"垃圾词:{_spam.EntryCount}，非垃圾词：{_ham.EntryCount}");
 		}
 	}
 }

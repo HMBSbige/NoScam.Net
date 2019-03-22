@@ -1,16 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using JiebaNet.Segmenter;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
-using JiebaNet.Segmenter;
 
 namespace nBayes
 {
 	public abstract class Entry : IEnumerable<string>
 	{
-		public Entry()
-		{
-		}
-
 		public static Entry FromString(string content)
 		{
 			return new StringEntry(content);
@@ -20,26 +15,23 @@ namespace nBayes
 
 		System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
 		{
-			return this.GetEnumerator();
+			return GetEnumerator();
 		}
 
 		private class StringEntry : Entry
 		{
-			private IEnumerable<string> tokens;
+			private readonly IEnumerable<string> _tokens;
 
-			public StringEntry(string stringcontent)
+			public StringEntry(string str)
 			{
-				tokens = Parse(stringcontent);
+				_tokens = Parse(str);
 			}
 
 			public override IEnumerator<string> GetEnumerator()
 			{
-				return tokens.GetEnumerator();
+				return _tokens.GetEnumerator();
 			}
 
-			/// <summary>
-			/// Tokenizes a string
-			/// </summary>
 			private static IEnumerable<string> Parse(string source)
 			{
 				var segmenter = new JiebaSegmenter();
@@ -49,15 +41,6 @@ namespace nBayes
 					   where !string.IsNullOrWhiteSpace(segment) && !char.IsPunctuation(segment[0])
 					   select segment.ToLowerInvariant();
 			}
-
-			/// <summary>
-			/// Replace invalid characters with spaces.
-			/// </summary>
-			private static string CleanInput(string strIn)
-			{
-				return Regex.Replace(strIn, @"[^\w\'@-]", " ");
-			}
 		}
-
 	}
 }
